@@ -91,8 +91,10 @@ namespace ProjektNet
             categoryViewSource.Source = db.Pogoda.Local;
             weatherEntitiesViewSource.Source = db.Pogoda.Local;
 
-
-
+            TempratureCheck.IsChecked = Properties.Settings.Default.Temprature;
+            HumidityCheck.IsChecked = Properties.Settings.Default.Humidity;
+            PressureCheck.IsChecked = Properties.Settings.Default.Pressure;
+            SelectedCity.Text = Properties.Settings.Default.City;
 
 
 
@@ -123,7 +125,7 @@ namespace ProjektNet
                 }
                 if (TempratureCheck.IsChecked == true)
                 {
-                    newEntry.Temperatura = result.Temperature;
+                    newEntry.Temperatura = KelvinToCelsius.KelvToCel(result.Temperature);
                 }
                 if (PressureCheck.IsChecked == true)
                 {
@@ -131,15 +133,15 @@ namespace ProjektNet
                 }
                 db.Pogoda.Add(newEntry);
                 db.SaveChanges();
-                // try
-                //{
-                //    db.SaveChanges();
-                //}
-                //catch (Exception ex)
-                //{
-                //   db.Pogoda.Local.Remove(newEntry);
-                // Debug.WriteLine("Error, id is not unique!");
-                //}
+                 try
+                {
+                   db.SaveChanges();
+                }
+                catch (Exception ex)
+                {
+                   db.Pogoda.Local.Remove(newEntry);
+                 Debug.WriteLine("Error, id is not unique!");
+                }
 
             }
 
@@ -151,6 +153,14 @@ namespace ProjektNet
 
         protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
         {
+            Properties.Settings.Default.Temprature = (bool)TempratureCheck.IsChecked;
+            Properties.Settings.Default.Humidity = (bool)HumidityCheck.IsChecked;
+            Properties.Settings.Default.Pressure = (bool)PressureCheck.IsChecked;
+            Properties.Settings.Default.City = SelectedCity.Text;
+            Properties.Settings.Default.Save();
+
+
+
             base.OnClosing(e);
             this.db.Dispose();
         }
@@ -172,14 +182,18 @@ namespace ProjektNet
         {
             int id = int.Parse(IdDelete.Text);
                 // Get movie to delete
-                var movieToDelete = db.Pogoda.First(m => m.Id == id);
+                var DataToDelete = db.Pogoda.First(m => m.Id == id);
 
             // Delete 
-                db.Pogoda.Remove(movieToDelete);
+                db.Pogoda.Remove(DataToDelete);
                 db.SaveChanges();
 
             
         }
+
+        
+
+        
     }
 }
     
